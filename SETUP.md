@@ -74,6 +74,12 @@ The core directory structure ships with the repository. You do not need to creat
 ├── LICENSE                     ← Non-commercial license
 ├── .gitignore_example          ← Copy this to .gitignore before your first commit
 │
+├── /helm/                      ← HELM CLI source code
+│   ├── package.json            ← Published to npm as 'chief-helm'
+│   ├── tsconfig.json
+│   ├── README.md               ← HELM developer and user docs
+│   └── /src/                   ← TypeScript source (see HELM_PRD.md for full structure)
+│
 ├── /getting_started/           ← Detailed setup guides (linked from checklist below)
 │   ├── RAILWAY_SETUP.md        ← Full Railway configuration walkthrough
 │   └── GOOGLE_APIS_SETUP.md    ← Gmail, Calendar, and Maps API setup
@@ -661,6 +667,16 @@ helm docs add
 
 **HELM** (Human-AI Executive Layer Manager) is the command-line interface for the entire system. It runs on Mac and Windows, provides a rich terminal UI, and is the primary way users interact with CHIEF.
 
+### Source Code & Installation
+
+HELM source code lives at `/helm/` in this repository. It is a self-contained Node.js package published to npm as `chief-helm`. Users install it once and it is available as the `helm` command globally. They never interact with the source code directly.
+
+```bash
+npm install -g chief-helm
+```
+
+Requires Node.js v20+ and Git. See the [Getting Started Checklist](#18-getting-started-checklist) for full prerequisites. The full HELM product specification is in `HELM_PRD.md`.
+
 ### Design Principles
 
 - **Feels like a cockpit, not a terminal.** Rich color, clear structure, satisfying interaction.
@@ -764,12 +780,11 @@ After approval: agents fire in parallel, terminal shows live progress per agent,
 
 ### Tech Stack for HELM
 
-- **Runtime:** Node.js (works cross-platform on Mac and Windows without extra install if bundled)
+- **Runtime:** Node.js v20+ (Mac and Windows)
 - **CLI framework:** [Ink](https://github.com/vadimdemedes/ink) — React for CLIs. Enables rich interactive UIs in terminal.
 - **Styling:** [Chalk](https://github.com/chalk/chalk) for colors, [Ora](https://github.com/sindresorhus/ora) for spinners
 - **Prompts:** [Inquirer.js](https://github.com/SBoudrias/Inquirer.js) for guided wizards
-- **Distribution:** `pkg` or [caxa](https://github.com/nicolo-ribaudo/caxa) to bundle as a standalone executable — users don't need Node.js installed
-- **Install:** Single binary download or `npm install -g chief-helm`
+- **Distribution:** Published to npm as `chief-helm`. Install with `npm install -g chief-helm`.
 
 ---
 
@@ -1095,8 +1110,13 @@ The templates in `/users/_template/` contain instructional comments to guide you
 
 - [ ] Install HELM CLI:
   ```bash
+  # Prerequisites: Node.js v20+ and Git must be installed first
+  # Node.js: https://nodejs.org → download LTS version
+  # Git (macOS): pre-installed, or: brew install git
+  # Git (Windows): https://git-scm.com
+
   npm install -g chief-helm
-  # or download the standalone binary for your OS
+  helm --version    # verify install worked
   ```
 
 - [ ] Run initial setup:

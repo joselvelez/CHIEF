@@ -44,6 +44,8 @@ Everything that passes through CHIEF gets classified into one of four states:
 
 **Humans approve before anything happens externally.** All interactive flows have a hard gate where you review the proposed action list before agents fire. Nothing hits Gmail, Google Calendar, or Todoist without your explicit go-ahead.
 
+**This repo contains the HELM source code.** HELM lives at `/helm/` and is published to npm as `chief-helm`. The framework (docs, templates, instruction files) and the CLI tool live together in one place. Your personal data lives separately in your own private instance repo.
+
 ---
 
 ## Components
@@ -83,10 +85,11 @@ CHIEF is designed for individual use but supports multiple independent users in 
 ## Getting Started
 
 1. Read **[SETUP.md](./SETUP.md)** — the complete architecture reference and setup guide
-2. Fork or clone this repository (make your instance private)
+2. Fork or clone this repository to create your private personal instance
 3. Copy `.gitignore_example` → `.gitignore` and commit it before adding anything personal
-4. Run `helm setup` to initialize your user profile
-5. Work through the [Getting Started Checklist](./SETUP.md#18-getting-started-checklist)
+4. Install HELM: `npm install -g chief-helm` (requires Node.js 20+ and Git)
+5. Run `helm setup` to initialize your user profile
+6. Work through the [Getting Started Checklist](./SETUP.md#18-getting-started-checklist)
 
 Detailed setup guides for specific steps are in **[/getting_started/](/getting_started/)**:
 - [Railway Setup](./getting_started/RAILWAY_SETUP.md)
@@ -104,6 +107,11 @@ This repository ships with the core directory structure already in place. Fork i
 ├── README.md                   ← This file
 ├── LICENSE                     ← License terms
 ├── .gitignore_example          ← Copy this to .gitignore before your first commit
+│
+├── /helm/                      ← HELM CLI source code (published to npm as chief-helm)
+│   ├── package.json
+│   ├── README.md
+│   └── /src/
 │
 ├── /getting_started/           ← Detailed step-by-step setup guides
 │   ├── RAILWAY_SETUP.md
