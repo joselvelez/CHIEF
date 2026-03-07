@@ -1,0 +1,106 @@
+# ============================================================
+# CHIEF — .gitignore
+# Secrets and credentials MUST NEVER be committed to this repo.
+# This file is the enforcement layer for that rule.
+# ============================================================
+
+# ----------------------------------
+# Secrets & Credentials (NEVER commit)
+# ----------------------------------
+.env
+.env.*
+*.env
+/secrets/
+secrets.yaml
+secrets.json
+*.key
+*.pem
+*.p12
+*.pfx
+*.token
+*.secret
+*_secret*
+*_token*
+*_credentials*
+credentials.json
+token.json
+client_secret*.json
+service_account*.json
+
+# ----------------------------------
+# OS Keychain / local auth stores
+# ----------------------------------
+.keychain
+.netrc
+.npmrc
+.pypirc
+
+# ----------------------------------
+# HELM local config (machine-specific, not shared)
+# ----------------------------------
+.helm-local/
+*.helm-local
+
+# ----------------------------------
+# Node / HELM CLI build artifacts
+# ----------------------------------
+node_modules/
+dist/
+build/
+.cache/
+*.tgz
+*.lock
+# Keep package-lock.json if HELM source lives in this repo
+# npm-shrinkwrap.json
+
+# ----------------------------------
+# Python (if any runners use Python)
+# ----------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.venv/
+*.egg-info/
+.eggs/
+
+# ----------------------------------
+# OS junk
+# ----------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ----------------------------------
+# Editor / IDE
+# ----------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.orig
+
+# ----------------------------------
+# Logs (local only — committed logs go to /logs/ via git commit)
+# Note: /logs/ IS tracked. Only exclude raw local runtime logs below.
+# ----------------------------------
+*.local.log
+/tmp/
+
+# ----------------------------------
+# Temporary / scratch files
+# ----------------------------------
+*.tmp
+*.bak
+*.backup
+scratch/
+_scratch/

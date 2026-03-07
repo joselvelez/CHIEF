@@ -1,0 +1,130 @@
+CHIEF Personal AI Operations System
+Non-Commercial Use License
+
+Version 1.0 — Effective Date: March 7, 2026
+
+Copyright (c) 2026 GridL. All rights reserved.
+
+---
+
+GRANT OF LICENSE
+
+Subject to the terms and conditions of this License, the copyright holder
+("Licensor") grants you a worldwide, royalty-free, non-exclusive license to:
+
+  1. Use this software and its associated documentation, configuration files,
+     templates, and instruction files (collectively, the "Work") for personal,
+     educational, research, or other non-commercial purposes.
+
+  2. Copy, adapt, modify, and create derivative works based on the Work,
+     provided such derivative works are also used solely for non-commercial
+     purposes and are distributed under the same license terms as this License.
+
+  3. Share and distribute the Work, or derivative works thereof, provided that:
+     a. You give appropriate credit to the original author (GridL), including
+        a link to the original repository where reasonably possible.
+     b. You clearly indicate if changes were made.
+     c. You do not apply additional legal terms that restrict others from
+        exercising the rights granted by this License.
+     d. Distribution is for non-commercial purposes only.
+
+---
+
+COMMERCIAL USE
+
+"Commercial use" means any use of the Work, in whole or in part, that is
+primarily intended for or directed toward commercial advantage or monetary
+compensation. This includes, but is not limited to:
+
+  - Offering the Work, or a product or service substantially derived from
+    the Work, for sale, license, or subscription fee
+  - Using the Work as part of a commercial product, platform, or service
+    offered to customers or clients
+  - Integrating the Work into a for-profit business's internal operations
+    where the Work provides direct commercial value
+  - White-labeling, reselling, or redistributing the Work under a different
+    name or brand for commercial purposes
+  - Offering the Work as part of a consulting engagement or professional
+    services deliverable to a paying client
+
+Commercial use of the Work requires a separate written agreement with the
+Licensor. To request a commercial license, contact the Licensor directly.
+
+Personal use by an individual for their own productivity — including use
+within their own business or professional practice, where the Work is not
+itself the product or service being sold — is NOT considered commercial use
+under this License.
+
+---
+
+RESTRICTIONS
+
+You may not:
+
+  1. Use the Work for any commercial purpose as defined above without prior
+     written consent from the Licensor.
+  2. Remove or obscure any copyright notices, license terms, or attribution
+     statements present in the Work.
+  3. Sublicense the Work to any third party for commercial purposes.
+  4. Represent that you are the original author of the Work or claim
+     ownership of unmodified portions of the Work.
+
+---
+
+NO WARRANTY
+
+THE WORK IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL
+THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN
+CONNECTION WITH THE WORK OR THE USE OR OTHER DEALINGS IN THE WORK.
+
+---
+
+LIMITATION OF LIABILITY
+
+In no event shall the Licensor be liable for any direct, indirect,
+incidental, special, exemplary, or consequential damages (including, but
+not limited to, loss of data, business interruption, or loss of profits)
+arising in any way out of the use of the Work, even if advised of the
+possibility of such damages.
+
+You are solely responsible for ensuring that your use of the Work complies
+with applicable laws and regulations, including data privacy laws governing
+the integration of third-party APIs (Gmail, Google Calendar, Todoist, Zoom,
+etc.) with your personal data.
+
+---
+
+TERMINATION
+
+This License and the rights granted hereunder will terminate automatically
+if you fail to comply with any of its terms. Upon termination, you must
+cease all use and distribution of the Work and destroy any copies in your
+possession. Sections covering No Warranty, Limitation of Liability, and
+Governing Law shall survive termination.
+
+---
+
+GOVERNING LAW
+
+This License shall be governed by and construed in accordance with
+applicable law, without regard to conflict of law principles. Any disputes
+arising under this License shall be resolved by the Licensor's jurisdiction
+of choice.
+
+---
+
+CONTACT
+
+For commercial licensing inquiries or questions about this License:
+
+  Author:     GridL
+  Repository: [repository URL]
+  Contact:    [contact method]
+
+---
+
+By using, copying, modifying, or distributing the Work, you agree to be
+bound by the terms of this License.
