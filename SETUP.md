@@ -64,10 +64,19 @@ Each user can add to this list in their `USER.md` profile. Hard rules cannot be 
 
 ## 2. Repository Structure
 
+The core directory structure ships with the repository. You do not need to create it manually — fork or clone the repo and it's already in place.
+
 ```
 /chief/
 │
 ├── SETUP.md                    ← This file. Master design reference.
+├── README.md                   ← Project overview
+├── LICENSE                     ← Non-commercial license
+├── .gitignore_example          ← Copy this to .gitignore before your first commit
+│
+├── /getting_started/           ← Detailed setup guides (linked from checklist below)
+│   ├── RAILWAY_SETUP.md        ← Full Railway configuration walkthrough
+│   └── GOOGLE_APIS_SETUP.md    ← Gmail, Calendar, and Maps API setup
 │
 ├── /config/
 │   ├── system.yaml             ← Global system settings
@@ -78,11 +87,13 @@ Each user can add to this list in their `USER.md` profile. Hard rules cannot be 
 │   └── engine.yaml             ← Orchestration engine config
 │
 ├── /users/
-│   └── /[username]/
-│       ├── USER.md             ← Profile, preferences, hard rules
-│       ├── VOICE.md            ← Communication style + tone
-│       ├── CLIENTS.md          ← Client/contact context (or CONTACTS.md)
-│       └── /docs/              ← User's custom key documents
+│   ├── /_template/             ← Copy this to /users/[yourname]/ to start
+│   │   ├── USER.md             ← Profile, preferences, hard rules (fill in)
+│   │   ├── VOICE.md            ← Communication style + tone (fill in)
+│   │   ├── CLIENTS.md          ← Client/contact context (fill in)
+│   │   ├── SCHEDULING.md       ← Scheduling preferences (fill in)
+│   │   └── CLASSIFY.md         ← Classification rules (fill in)
+│   └── /[username]/            ← Your personal namespace (created during setup)
 │
 ├── /instructions/
 │   ├── /agents/
@@ -148,65 +159,29 @@ When a new user runs `helm setup`, they are guided through:
 8. **Hard Rules** — any additions to the system defaults
 9. **Secrets** — guided setup for each required credential
 
-The output of setup is a populated `/users/[username]/` directory and updated `config/*.yaml` files, committed to git.
+The output of setup is a copy of `/users/_template/` populated with your answers under `/users/[username]/`, plus updated `config/*.yaml` files, all committed to git.
 
 ### USER.md — Example
 
-```markdown
-# User Profile: [username]
-
-## Identity
-- **Name:** Jane Doe
-- **Username:** jane
-- **Timezone:** America/Los_Angeles
-- **Language:** English
-- **Setup Date:** 2026-03-07
-
-## Role Context
-Solo professional services consultant. Five clients maximum. No junior staff.
-Primary work: strategic writing, client calls, advisory work.
-
-## Working Hours
-- Core hours: 8:00 AM – 5:30 PM
-- Deep work blocks: 8:00 AM – 11:00 AM (protect these)
-- No meetings before 9:00 AM unless explicitly approved
-- Hard stop: 6:30 PM
-
-## Locations
-- Home office: [address or descriptor]
-- Client office A: [address]
-- Gym: [address] — Tuesday, Thursday, Saturday mornings
-
-## Hard Rules (User Additions)
-- Never draft a reply to [specific person] — always flag as Yours
-- Never schedule back-to-back calls. Minimum 15 min buffer.
-- Strategic Briefs are always Yours. Never Prep or Dispatch.
-- Do not create calendar events on Sundays.
-
-## Classification Defaults
-- Emails from new contacts not in CLIENTS.md → always Prep, never Dispatch
-- Invoice or payment topics → always Yours
-- Press inquiries → always Yours
-
-## Preferred Output Style
-- Completion reports: concise bullet list, no preamble
-- Research outputs: executive summary first, detail below
-- Email drafts: show subject line, to/from, and body. Flag any assumptions made.
-
-## Key Documents
-| Document | Path | Used By | Last Updated |
-|---|---|---|---|
-| Voice & Tone | /users/jane/VOICE.md | email_drafter, notes_agent | 2026-03-07 |
-| Client Profiles | /users/jane/CLIENTS.md | all agents | 2026-03-07 |
-| Scheduling Rules | /users/jane/SCHEDULING.md | calendar_manager, time_blocker | 2026-03-07 |
-| Classification Rules | /users/jane/CLASSIFY.md | task_classifier | 2026-03-07 |
-```
+See the filled example in `/users/_template/USER.md`. Copy the entire `_template/` folder to `/users/[yourname]/` and fill in every section. The template includes instructional comments to guide you.
 
 ---
 
 ## 4. Layer 1 — Source of Truth (Git)
 
 The private git repository is the operating system of the system. Every component reads from and writes back to it.
+
+### First Thing: Set Up Your .gitignore
+
+The repo ships with `.gitignore_example`. Before adding any personal files or credentials, copy it to `.gitignore`:
+
+```bash
+cp .gitignore_example .gitignore
+git add .gitignore
+git commit -m "add gitignore"
+```
+
+Never commit the `.gitignore_example` with secrets in it — it is a template that stays in the repo. Your `.gitignore` is what protects you.
 
 ### Git Discipline Rules
 
@@ -215,20 +190,6 @@ The private git repository is the operating system of the system. Every componen
 - **Instruction files and config files are human-edited** — never overwritten by agents
 - **Outputs directory is agent-written** — treated as staging, not permanent record
 - **Secrets are never committed** — `.gitignore` enforces this strictly
-
-### .gitignore Defaults
-
-```
-.env
-*.env
-/secrets/
-*.key
-*.pem
-*.token
-node_modules/
-__pycache__/
-.DS_Store
-```
 
 ### Commit Message Convention
 
@@ -501,7 +462,7 @@ triggers:
     label: Overnight Triage
     enabled: true
     type: scheduled
-    schedule: "0 5 * * 1-5"      # 5 AM weekdays (cron syntax)
+    schedule: "0 5 * * 1-5"      # 5 AM weekdays (cron syntax, adjust for your timezone)
     platform: railway
     flow: overnight_triage
     human_gate: false             # Runs fully automated, report delivered async
@@ -674,185 +635,24 @@ Key documents are the system's understanding of who you are and how you operate.
 
 Each key document is registered in the user's `USER.md` under a `## Key Documents` section. When HELM builds a context package for an agent, it reads this registry and includes the relevant documents based on the `context_keys` declared in `agents.yaml`.
 
+### The Five Core Documents
+
+All five are pre-populated as templates in `/users/_template/`. Each template includes instructional comments that guide you through filling them in. **Read the comments, fill in your real information, then delete the comments before committing.**
+
+| Document | Purpose | Primary Consumers |
+|---|---|---|
+| `USER.md` | Identity, working hours, locations, hard rules | All agents |
+| `VOICE.md` | Communication style, tone, phrases to use and avoid | Email Drafter, Notes Agent |
+| `CLIENTS.md` | Client profiles, sensitivity levels, contact rules | All agents |
+| `SCHEDULING.md` | Protected blocks, meeting rules, task routing | Calendar Manager, Time Blocker |
+| `CLASSIFY.md` | Classification rules, source-specific logic, metadata schema | Task Classifier |
+
 ### Adding a New Key Document
 
 ```bash
 helm docs add
 # → Prompts: document name, purpose, which agents should read it,
 #   uses /templates/key_document.md as scaffold, registers in USER.md
-```
-
----
-
-### Example: VOICE.md
-
-```markdown
-# Voice & Communication Style
-**Owner:** [username] | **Version:** 1.0.0
-
-## Overall Tone
-Direct and warm. Confident without being aggressive. Professional but human.
-No filler phrases. No corporate speak.
-
-## Email Style
-- Short paragraphs. Two to four sentences maximum per paragraph.
-- Lead with the main point. Context comes after.
-- Clear ask or next step in every email that requires a response.
-- Signature: First name only for ongoing relationships. Full name for new contacts.
-
-## Phrases I Use
-- "Happy to jump on a quick call if easier"
-- "Let me know if you need anything else from my end"
-- "Following up on the below"
-
-## Phrases I Never Use
-- "Per my last email" — too passive aggressive
-- "Hope this finds you well" — remove from all drafts
-- "As per our conversation" — use "Following our call" instead
-- "Please don't hesitate to" — just say "feel free to"
-- Exclamation points — use sparingly, maximum one per email
-
-## Formality by Audience
-| Audience | Tone |
-|---|---|
-| Long-term clients | Casual, first names, light humor acceptable |
-| New prospects | Professional, slightly formal |
-| Media/press | Measured, precise, no speculation |
-| Vendors | Friendly but brief |
-
-## Things I Never Write About in Email
-- Pricing specifics (always move to call)
-- Anything I wouldn't want forwarded
-- Apologies for response time (just respond, don't apologize)
-```
-
----
-
-### Example: CLIENTS.md
-
-```markdown
-# Client & Contact Profiles
-**Owner:** [username] | **Version:** 1.0.0
-
-## Active Clients
-
-### [Client Name A]
-- **Type:** Active client
-- **Since:** 2024-06
-- **Primary Contact:** [Name], [Title]
-- **Email domain:** @company.com
-- **Engagement:** Strategic advisory, monthly retainer
-- **Sensitivity:** High. Cc the primary contact on all communications.
-- **Communication preference:** Email for non-urgent, text for urgent
-- **Current focus:** [Brief description of active engagement]
-- **Do not:** Discuss competitor names in writing. Always flag pricing discussions as Yours.
-
-### [Client Name B]
-- **Type:** Active client
-- **Primary Contact:** [Name]
-- **Sensitivity:** Medium
-- **Notes:** Prefers early morning calls. Always send recap after calls.
-
-## Warm Prospects
-
-### [Prospect Name]
-- **Status:** Intro call completed, follow-up pending
-- **Context:** Referred by [name]. Interested in [topic].
-- **Next step:** Send capabilities overview
-- **Classification rule:** All communications → Prep (never Dispatch)
-
-## Key Contacts (Non-Client)
-
-### [Name]
-- **Role:** [relationship/role]
-- **Notes:** [any relevant context the system should know]
-```
-
----
-
-### Example: SCHEDULING.md
-
-```markdown
-# Scheduling Rules
-**Owner:** [username] | **Version:** 1.0.0
-
-## Working Hours
-- Start: 8:00 AM
-- End: 6:00 PM
-- Timezone: America/Los_Angeles
-
-## Protected Blocks
-- **Deep Work:** 8:00–11:00 AM daily. No meetings. No exceptions without explicit override.
-- **Admin:** 11:00 AM–12:00 PM. Light tasks, emails, scheduling.
-- **Lunch:** 12:00–1:00 PM. Do not schedule over this.
-- **Evening:** After 8:30 PM, home tasks only.
-
-## Meeting Rules
-- Minimum 15-minute buffer between back-to-back meetings
-- No meetings before 9:00 AM
-- No meetings after 5:30 PM (unless flagged as Yours and I approve)
-- Video calls: 30 or 50 minutes only (never 60 — preserve transition time)
-- External client calls: afternoons preferred
-
-## Locations
-- **Home:** [address or "home"] — remote work, home tasks
-- **Office:** [address] — client meetings, focused work
-- **Gym:** [address] — Tue/Thu/Sat mornings, 6:30–7:45 AM
-
-## Task Scheduling Rules
-- Tasks with a location tag of "gym" → Tue/Thu/Sat 6:30 AM only
-- Tasks tagged "errand" → batch together, single outing, afternoon window
-- Tasks tagged "home" → evening window after 8:30 PM
-- Tasks tagged "deep-work" → morning block only, never afternoon
-- If a task doesn't fit today → suggest nearest low-load future date, don't force it
-
-## Calendar Buffer Rules
-- Before physical location meeting: insert drive time event (via Maps API)
-- After external client call: 10-minute unscheduled buffer minimum
-- End of day: 15-minute wrap-up block if schedule permits
-```
-
----
-
-### Example: CLASSIFY.md
-
-```markdown
-# Classification Rules
-**Owner:** [username] | **Version:** 1.0.0
-
-## Default Classification Logic
-
-### Dispatch (🟢) — AI handles fully
-- Scheduling or rescheduling routine meetings (no new contacts)
-- Filing meeting notes to existing client files
-- Research on known topics with defined output format
-- Drafting routine follow-up emails (existing contacts, non-sensitive)
-
-### Prep (🟡) — AI gets 80%, I finish
-- First email to any new contact
-- Any email involving pricing, proposals, or contract terms
-- Meeting prep briefs
-- Any communication involving a sensitive client (flagged in CLIENTS.md)
-- Any task where the context is ambiguous
-
-### Yours (🔴) — Flag for me with assembled context
-- Strategic Briefs and core client deliverables
-- Any financial or legal decision
-- Relationship-sensitive communications
-- Press or media inquiries
-- Anything involving a contact not in CLIENTS.md with high email authority (founder, exec, journalist)
-- Any task that requires physical presence
-
-### Skip (⚫) — Defer with reason
-- Tasks with missing information needed to proceed
-- Tasks that are blocked on someone else's action
-- Tasks that don't fit today's capacity (suggest future date)
-- Newsletters, marketing, FYI emails requiring no action
-
-## Override Rules
-- If uncertain between Prep and Dispatch → Prep
-- If uncertain between Prep and Yours → Yours
-- Never upgrade a task that has been manually set to Yours
 ```
 
 ---
@@ -1140,34 +940,35 @@ git revert <commit>
 
 Scheduled flows (overnight jobs) run on Railway. The setup keeps a clear separation: Railway handles scheduled execution; the local machine handles interactive flows via HELM.
 
-### Railway Setup
+For the complete Railway setup walkthrough, see **[/getting_started/RAILWAY_SETUP.md](./getting_started/RAILWAY_SETUP.md)**.
 
-1. **Service:** A single Railway service running a Node.js (or Python) job runner
-2. **Cron jobs:** Defined in Railway dashboard as scheduled tasks, pointing to flow IDs
-3. **Environment variables:** All secrets live in Railway's environment variable store (not in the repo)
-4. **Git integration:** Railway pulls the latest repo on each run, ensuring it always uses current instruction files
-5. **Logs:** Railway logs are mirrored to `/logs/[user]/` and committed to git for auditability
+### Summary
 
-### Railway Environment Variables to Configure
+1. **Service:** A single Railway service running a Node.js job runner
+2. **Cron jobs:** Two scheduled tasks defined in Railway dashboard
+3. **Environment variables:** All secrets live in Railway's env var store (not in the repo)
+4. **Git integration:** Railway pulls the latest repo on each run
+5. **Logs:** Mirrored to `/logs/[user]/` and committed to git
+
+### Railway Environment Variables
 
 ```
-CHIEF_USERNAME=[your username]
-CHIEF_REPO_SSH_KEY=[deploy key for pulling the repo]
-ANTHROPIC_API_KEY=[for LLM calls]
-GMAIL_OAUTH_TOKEN=[from Google OAuth]
-GCAL_OAUTH_TOKEN=[from Google OAuth]
-GOOGLE_MAPS_API_KEY=
-TODOIST_API_TOKEN=
-ZOOM_OAUTH_TOKEN=
+CHIEF_USERNAME
+ANTHROPIC_API_KEY
+GMAIL_CLIENT_ID / GMAIL_CLIENT_SECRET / GMAIL_OAUTH_REFRESH_TOKEN
+GCAL_CLIENT_ID / GCAL_CLIENT_SECRET / GCAL_OAUTH_REFRESH_TOKEN
+GOOGLE_MAPS_API_KEY
+TODOIST_API_TOKEN
+ZOOM_ACCOUNT_ID / ZOOM_CLIENT_ID / ZOOM_CLIENT_SECRET / ZOOM_OAUTH_TOKEN
+CHIEF_REPO_DEPLOY_KEY
 ```
 
-### Failure Handling on Railway
+### Failure Handling
 
 - Each flow writes to `state/[user]/last_run.json` only on success
-- If a run fails, the state file is not updated, so the next run re-processes
-- Idempotency is enforced by `state/[user]/processed_ids.json` to prevent duplicate task creation
-- Railway auto-retries on crash (configure max 2 retries)
-- Error logs committed to git so you can inspect what happened
+- Idempotency is enforced by `state/[user]/processed_ids.json`
+- Railway auto-retries on crash (max 2 retries)
+- Error logs committed to git for post-mortem
 
 ---
 
@@ -1177,89 +978,232 @@ Zoom's native AI Companion feature generates meeting summaries automatically. Th
 
 ### How It Works
 
-After a Zoom meeting ends, Zoom AI generates a summary that includes:
-- Meeting overview
-- Key topics discussed
-- Action items identified
-- Next steps
-
-These summaries are available via the Zoom REST API within approximately 30 minutes of the meeting ending.
+After a Zoom meeting ends, Zoom AI generates a summary including meeting overview, key topics, action items, and next steps. Summaries are available via the Zoom REST API within ~30 minutes of the meeting ending.
 
 ### API Endpoints Used
 
-- `GET /meetings/{meetingId}/meeting_summary` — fetch AI-generated summary for a specific meeting
-- `GET /users/{userId}/recordings` — list recent meetings with recordings (used to discover recent meeting IDs)
+- `GET /meetings/{meetingId}/meeting_summary` — fetch AI-generated summary
+- `GET /users/{userId}/recordings` — list recent meetings (used to discover meeting IDs)
 
 ### Setup Requirements
 
-1. **Zoom OAuth App:** Create an OAuth app in the Zoom App Marketplace (Server-to-Server OAuth recommended for automated access)
+1. **Zoom OAuth App:** Server-to-Server OAuth app in the Zoom App Marketplace
 2. **Required Scopes:** `meeting:read:admin`, `meeting_summary:read:admin`, `recording:read:admin`
-3. **Zoom Account:** AI Companion must be enabled on the account (available on paid plans)
-4. **Meeting requirement:** AI summary is generated only when Zoom AI Companion is active during the call
+3. **Zoom Account:** AI Companion must be enabled (paid plans)
 
-### What the Notes Agent Does With Summaries
+### What the Notes Agent Does
 
-1. Fetches summaries for all meetings in the last 24 hours (overnight run) or last 3 days (AM Sweep)
-2. Identifies which client or project each meeting belongs to (matching against CLIENTS.md)
-3. Extracts action items → formats as task objects → adds to Todoist (with source attribution)
-4. Appends summary to the relevant client knowledge base file in `/knowledge/[user]/clients/`
-5. Never overwrites existing strategic content — only appends with timestamp and meeting date
-
-### Fallback
-
-If Zoom AI Companion is not active for a meeting (guest calls, etc.), the agent skips that meeting and logs it as "no summary available."
+1. Fetches summaries for meetings in the last 24h (overnight) or last 3 days (AM Sweep)
+2. Matches each meeting to a client or project via CLIENTS.md
+3. Extracts action items → formats as task objects → adds to Todoist
+4. Appends meeting summary to client knowledge base file
+5. Never overwrites strategic content — appends only
 
 ---
 
 ## 18. Getting Started Checklist
 
-Work through this in order. Don't skip the document-writing steps.
+Work through these phases in order. Do not skip the document-writing phase — it is the most important work you'll do.
 
-### Phase 1: Repository Setup (30 min)
-- [ ] Create private GitHub repository
-- [ ] Clone to local machine and to Railway service
-- [ ] Commit this SETUP.md as the first file
-- [ ] Create initial directory structure (all folders listed in Section 2)
-- [ ] Create `.gitignore` with secrets entries
+---
 
-### Phase 2: Accounts & Credentials (2–4 hours)
-- [ ] Google Cloud Console — create project, enable Gmail API, Google Calendar API, Google Maps API, generate OAuth credentials
-- [ ] Todoist — generate API token from integrations settings
-- [ ] Zoom — create Server-to-Server OAuth app in Zoom App Marketplace, enable AI Companion on account
-- [ ] Anthropic — generate API key for LLM calls
-- [ ] Railway — create account, create service, configure environment variables
+### Phase 1 — Repository Setup
 
-### Phase 3: Write Your Documents (4–8 hours — don't rush this)
-- [ ] `USER.md` — your profile, working hours, locations, hard rules
-- [ ] `VOICE.md` — your communication style (use example in Section 10 as scaffold)
-- [ ] `CLIENTS.md` — every active client and key contact
-- [ ] `SCHEDULING.md` — your exact scheduling preferences
-- [ ] `CLASSIFY.md` — your classification rules with examples
+**Estimated time: 15 minutes**
 
-### Phase 4: Install & Configure HELM (1–2 hours)
-- [ ] Install HELM CLI
-- [ ] Run `helm setup` — guided wizard for your user profile
-- [ ] Run `helm secrets set` for each credential
-- [ ] Run `helm inputs test` for each input to verify connections
-- [ ] Run `helm agents list` to confirm all agents are configured
+- [ ] Fork or clone this repository
+- [ ] Make your fork **private** (your config and knowledge base should not be public)
+- [ ] Copy `.gitignore_example` → `.gitignore`:
+  ```bash
+  cp .gitignore_example .gitignore
+  git add .gitignore
+  git commit -m "add gitignore"
+  ```
+- [ ] Verify the core directory structure is in place (`/config`, `/users`, `/instructions`, etc.)
 
-### Phase 5: First Runs (1–2 hours)
-- [ ] Run `helm run overnight-triage` manually to test (not via cron)
-- [ ] Review outputs in `/outputs/[user]/`
-- [ ] Run `helm run am-sweep` — review the classification before approving
-- [ ] Run `helm run time-block` — review the proposed schedule before approving
-- [ ] Adjust instruction files based on anything that looks wrong
-- [ ] Commit all instruction file changes
+---
 
-### Phase 6: Enable Automation (30 min)
-- [ ] Enable Railway cron triggers for overnight flows
-- [ ] Verify first automated overnight run succeeds
-- [ ] Check git log to confirm state and outputs were committed
+### Phase 2 — Accounts & Credentials
 
-### Phase 7: Ongoing (Weekly)
-- [ ] Run `helm logs --week` to review system performance
-- [ ] Tune any instruction files where agent behavior was off
-- [ ] Commit all tuning changes with descriptive messages
+**Estimated time: 2–4 hours**
+**Detailed guides:** [Google APIs Setup](./getting_started/GOOGLE_APIS_SETUP.md) · [Railway Setup](./getting_started/RAILWAY_SETUP.md)
+
+- [ ] **Google Cloud Console** — Create project, enable Gmail API + Google Calendar API + Maps Distance Matrix API, create OAuth 2.0 credentials, generate tokens
+  → Full steps: [Google APIs Setup](./getting_started/GOOGLE_APIS_SETUP.md)
+
+- [ ] **Todoist** — Generate API token
+  → Go to [app.todoist.com](https://app.todoist.com) → Settings → Integrations → Developer → copy API token
+
+- [ ] **Zoom** — Create Server-to-Server OAuth app, enable AI Companion
+  → Go to [marketplace.zoom.us](https://marketplace.zoom.us) → Develop → Build App → Server-to-Server OAuth
+  → Required scopes: `meeting:read:admin`, `meeting_summary:read:admin`, `recording:read:admin`
+  → Enable Zoom AI Companion in your account settings (requires paid plan)
+
+- [ ] **Anthropic** — Generate API key
+  → Go to [console.anthropic.com](https://console.anthropic.com) → API Keys → Create Key
+
+- [ ] **Railway** — Create account, project, and service
+  → Full steps: [Railway Setup](./getting_started/RAILWAY_SETUP.md)
+
+---
+
+### Phase 3 — Write Your Key Documents
+
+**Estimated time: 4–8 hours — do not rush this**
+
+This is the highest-leverage work in the entire setup. The quality of your key documents directly determines the quality of every agent output.
+
+The templates in `/users/_template/` contain instructional comments to guide you. For each document: read the comments, fill in your real information, delete the comments, then commit.
+
+- [ ] **Copy the template folder to your namespace:**
+  ```bash
+  cp -r users/_template users/[yourname]
+  ```
+
+- [ ] **Fill in `USER.md`** — your profile, working hours, locations, hard rules, output style preferences
+  → Template: [/users/_template/USER.md](./users/_template/USER.md)
+  → This file seeds the identity context for all agents
+
+- [ ] **Fill in `VOICE.md`** — your communication style, tone, phrases you use and never use, formality by audience
+  → Template: [/users/_template/VOICE.md](./users/_template/VOICE.md)
+  → Tip: pull up 5–10 emails you've written that you're proud of and use them as source material
+
+- [ ] **Fill in `CLIENTS.md`** — every active client, warm prospect, and key contact with sensitivity levels and rules
+  → Template: [/users/_template/CLIENTS.md](./users/_template/CLIENTS.md)
+  → The Do Not Touch section is especially important — fill it in first
+
+- [ ] **Fill in `SCHEDULING.md`** — protected blocks, meeting rules, location list, task routing rules
+  → Template: [/users/_template/SCHEDULING.md](./users/_template/SCHEDULING.md)
+  → Include your real addresses for Maps API routing to work correctly
+
+- [ ] **Fill in `CLASSIFY.md`** — Dispatch/Prep/Yours/Skip rules, source-specific logic, metadata requirements
+  → Template: [/users/_template/CLASSIFY.md](./users/_template/CLASSIFY.md)
+  → The most operationally critical document. Be conservative with Dispatch.
+
+- [ ] **Commit your filled documents:**
+  ```bash
+  git add users/[yourname]/
+  git commit -m "[manual] initial key documents — [yourname]"
+  git push
+  ```
+
+---
+
+### Phase 4 — Install & Configure HELM
+
+**Estimated time: 1–2 hours**
+
+- [ ] Install HELM CLI:
+  ```bash
+  npm install -g chief-helm
+  # or download the standalone binary for your OS
+  ```
+
+- [ ] Run initial setup:
+  ```bash
+  helm setup
+  # → Guided wizard: confirms your username, links to your user folder,
+  #   walks through each credential
+  ```
+
+- [ ] Store all credentials in the OS keychain:
+  ```bash
+  helm secrets set GMAIL_CLIENT_ID
+  helm secrets set GMAIL_CLIENT_SECRET
+  helm secrets set GMAIL_OAUTH_REFRESH_TOKEN
+  helm secrets set GCAL_CLIENT_ID
+  helm secrets set GCAL_CLIENT_SECRET
+  helm secrets set GCAL_OAUTH_REFRESH_TOKEN
+  helm secrets set GOOGLE_MAPS_API_KEY
+  helm secrets set TODOIST_API_TOKEN
+  helm secrets set ZOOM_ACCOUNT_ID
+  helm secrets set ZOOM_CLIENT_ID
+  helm secrets set ZOOM_CLIENT_SECRET
+  ```
+
+- [ ] Test every connection:
+  ```bash
+  helm inputs test gmail
+  helm inputs test google_calendar
+  helm inputs test google_maps
+  helm inputs test todoist
+  helm inputs test zoom
+  ```
+  All should return ✓. Fix any failures before proceeding.
+
+- [ ] Verify system status:
+  ```bash
+  helm status
+  # → Should show all inputs connected, all agents configured
+  ```
+
+---
+
+### Phase 5 — First Runs (Manual)
+
+**Estimated time: 1–2 hours**
+
+Run everything manually first to verify behavior before enabling automation.
+
+- [ ] **Test Overnight Triage manually:**
+  ```bash
+  helm run overnight-triage
+  ```
+  Then check:
+  - `/outputs/[yourname]/[today]/overnight_report.md` — does the triage report look right?
+  - Todoist — were tasks created correctly?
+  - `/logs/[yourname]/[today].log` — any errors?
+  - GitHub — did the auto-commit land?
+
+- [ ] **Test AM Sweep:**
+  ```bash
+  helm run am-sweep
+  ```
+  Review the classified task list carefully. Check:
+  - Are Dispatch items things you'd genuinely be comfortable delegating?
+  - Are Yours items correctly identified?
+  - Does the list feel right for your context?
+  Approve a small batch and review the outputs.
+
+- [ ] **Test Time Block:**
+  ```bash
+  helm run time-block
+  ```
+  Review the proposed schedule. Check:
+  - Are protected blocks being respected?
+  - Are locations being used for routing?
+  - Does the day structure feel right?
+  Do NOT approve and push to calendar yet — just review.
+
+- [ ] **Tune anything that looks wrong:**
+  ```bash
+  helm tune task_classifier   # if classifications are off
+  helm tune time_blocker      # if schedule structure is wrong
+  helm tune email_drafter     # if draft tone is off
+  ```
+  Commit all instruction file changes.
+
+---
+
+### Phase 6 — Enable Railway Automation
+
+**Estimated time: 30 minutes**
+**Detailed guide:** [Railway Setup](./getting_started/RAILWAY_SETUP.md)
+
+- [ ] Complete Railway setup (Steps 1–6 in [Railway Setup guide](./getting_started/RAILWAY_SETUP.md))
+- [ ] Trigger a manual Railway run and verify it succeeds
+- [ ] Check GitHub for the auto-commit from Railway
+- [ ] Enable the cron schedules for Overnight Triage and Transit Prep
+- [ ] Wait for the first automated overnight run and verify the output
+
+---
+
+### Phase 7 — Ongoing
+
+- [ ] Run `helm logs --week` weekly to review system performance
+- [ ] Use `helm tune <agent>` when something is misclassified or a draft is off
+- [ ] Commit all instruction file changes with descriptive messages
+- [ ] Update key documents as your clients, schedule, or working style changes
 
 ---
 

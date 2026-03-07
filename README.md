@@ -3,8 +3,6 @@
 
 CHIEF is a modular, git-backed personal AI operations system that automates the daily operational overhead of your life and work — email triage, task classification, calendar management, research, and time-blocking — using a network of specialized AI agents that run on your schedule and only act with your approval.
 
-** This project was inspired by a post on X - https://x.com/jimprosser/status/2029699731539255640
-
 ---
 
 ## What It Does
@@ -37,8 +35,6 @@ Everything that passes through CHIEF gets classified into one of four states:
 ---
 
 ## How It's Built
-
-CHIEF is designed around a small number of core principles:
 
 **Git is the operating system.** Every instruction file, config file, context package, and output is version-controlled. Every run starts with `git pull` and ends with `git commit + push`. You have a complete audit history of everything the system did and why.
 
@@ -87,29 +83,52 @@ CHIEF is designed for individual use but supports multiple independent users in 
 ## Getting Started
 
 1. Read **[SETUP.md](./SETUP.md)** — the complete architecture reference and setup guide
-2. Fork or clone this repository (make it private for your instance)
-3. Run `helm setup` to initialize your user profile
-4. Work through the [Getting Started Checklist](./SETUP.md#18-getting-started-checklist)
+2. Fork or clone this repository (make your instance private)
+3. Copy `.gitignore_example` → `.gitignore` and commit it before adding anything personal
+4. Run `helm setup` to initialize your user profile
+5. Work through the [Getting Started Checklist](./SETUP.md#18-getting-started-checklist)
+
+Detailed setup guides for specific steps are in **[/getting_started/](/getting_started/)**:
+- [Railway Setup](./getting_started/RAILWAY_SETUP.md)
+- [Google APIs Setup](./getting_started/GOOGLE_APIS_SETUP.md)
 
 ---
 
 ## Repository Structure
 
+This repository ships with the core directory structure already in place. Fork it and you're ready to configure.
+
 ```
 /chief/
-├── SETUP.md              ← Architecture reference and setup guide (start here)
-├── README.md             ← This file
-├── LICENSE               ← License terms
-├── .gitignore            ← Secrets enforcement
-├── /config/              ← System configuration (inputs, agents, flows, triggers)
-├── /users/               ← Per-user profiles and key documents
-├── /instructions/        ← Agent and flow instruction files (plain English)
-├── /templates/           ← Scaffolds for creating new agents, flows, documents
-├── /context/             ← Generated daily context packages (versioned)
-├── /outputs/             ← Agent outputs pending review
-├── /state/               ← Idempotency and run state files
-├── /logs/                ← Run history and audit trail
-└── /knowledge/           ← Markdown knowledge base (client files, notes)
+├── SETUP.md                    ← Architecture reference and setup guide (start here)
+├── README.md                   ← This file
+├── LICENSE                     ← License terms
+├── .gitignore_example          ← Copy this to .gitignore before your first commit
+│
+├── /getting_started/           ← Detailed step-by-step setup guides
+│   ├── RAILWAY_SETUP.md
+│   └── GOOGLE_APIS_SETUP.md
+│
+├── /config/                    ← System configuration (inputs, agents, flows, triggers)
+│
+├── /users/                     ← Per-user profiles and key documents
+│   └── /_template/             ← Copy this to /users/[yourname]/ and fill it in
+│       ├── USER.md
+│       ├── VOICE.md
+│       ├── CLIENTS.md
+│       ├── SCHEDULING.md
+│       └── CLASSIFY.md
+│
+├── /instructions/              ← Agent and flow instruction files (plain English)
+│   ├── /agents/
+│   └── /flows/
+│
+├── /templates/                 ← Scaffolds for creating new agents, flows, documents
+├── /context/                   ← Generated daily context packages (versioned)
+├── /outputs/                   ← Agent outputs pending review
+├── /state/                     ← Idempotency and run state files
+├── /logs/                      ← Run history and audit trail
+└── /knowledge/                 ← Markdown knowledge base (client files, notes)
 ```
 
 ---
