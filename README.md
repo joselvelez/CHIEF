@@ -3,6 +3,8 @@
 
 CHIEF is a modular, git-backed personal AI operations system that automates the daily operational overhead of your life and work — email triage, task classification, calendar management, research, and time-blocking — using a network of specialized AI agents that run on your schedule and only act with your approval.
 
+** This project was inspired by a post on X - https://x.com/jimprosser/status/2029699731539255640
+
 ---
 
 ## What It Does
