@@ -141,6 +141,35 @@ This repository ships with the core directory structure already in place. Fork i
 
 ---
 
+## Releases
+
+Releases are managed via GitHub Actions workflows in `/.github/workflows/`.
+
+**CHIEF release** (documentation, templates, framework changes):
+
+```bash
+git tag chief-v0.1.0
+git push origin main && git push origin chief-v0.1.0
+```
+
+Triggers `chief-release.yml` → creates a GitHub Release with auto-generated notes.
+
+**Helm release** (CLI tool, published to npm as `chief-helm`):
+
+```bash
+cd helm/
+./scripts/release.sh 0.2.0    # bumps version, builds, commits, tags
+git push origin main && git push origin helm-v0.2.0
+```
+
+Triggers `helm-release.yml` → builds, publishes to npm, creates a GitHub Release.
+
+See [helm/Readme.md](./helm/Readme.md#publishing) for detailed Helm publishing docs.
+
+**Prerequisite:** Add an `NPM_TOKEN` secret in GitHub repo settings for Helm npm publishing.
+
+---
+
 ## License
 
 CHIEF is released under a custom Non-Commercial license. You are free to use, adapt, and share this system for personal and non-commercial purposes. Commercial use requires explicit written consent from the author. See [LICENSE](./LICENSE) for full terms.

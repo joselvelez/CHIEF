@@ -205,7 +205,6 @@ Never swallow errors. Never put secret values in error messages.
 4. Call `requireSetup()` at the top of the action handler (unless the command is `setup` itself)
 
 ### Publishing
-### Publishing
 
 Releases are automated via GitHub Actions. The workflow at `/.github/workflows/helm-release.yml` triggers on tags matching `helm-v*`.
 
