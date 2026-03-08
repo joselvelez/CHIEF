@@ -51,7 +51,7 @@ export function formatHelmError(error: HelmError): string {
 export function formatUnexpectedError(error: unknown): string {
   const message =
     error instanceof Error ? error.message : String(error);
-  return `✗ Unexpected error: ${message}\n  → This is a bug. Please report it at https://github.com/[owner]/chief/issues`;
+  return `✗ Unexpected error: ${message}\n  → This is a bug. Please report it at https://github.com/joselvelez/chief/issues`;
 }
 
 /**
