@@ -205,16 +205,32 @@ Never swallow errors. Never put secret values in error messages.
 4. Call `requireSetup()` at the top of the action handler (unless the command is `setup` itself)
 
 ### Publishing
+### Publishing
+
+Releases are automated via GitHub Actions. The workflow at `/.github/workflows/helm-release.yml` triggers on tags matching `helm-v*`.
+
+**Using the release script:**
 
 ```bash
 cd helm/
-npm version patch       # or minor / major
-npm publish             # prepublishOnly runs tsc automatically
-git push && git push --tags
+./scripts/release.sh 0.2.0    # bumps version, builds, commits, tags
+git push origin main && git push origin helm-v0.2.0   # triggers CI → npm publish + GitHub Release
+```
+
+**Manual process:**
+
+```bash
+cd helm/
+npm version 0.2.0 --no-git-tag-version
+npm run build
+cd ..
+git add helm/package.json helm/package-lock.json
+git commit -m "[helm-release] v0.2.0"
+git tag helm-v0.2.0
+git push origin main && git push origin helm-v0.2.0
 ```
 
 `prepublishOnly` compiles TypeScript to `dist/` before every publish. Only `dist/` and `README.md` are included in the published package.
-
 ---
 
 *HELM is part of the CHIEF personal AI operations system. See [SETUP.md](../SETUP.md) for full system documentation.*
