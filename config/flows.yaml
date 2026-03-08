@@ -1,0 +1,97 @@
+# CHIEF — flows.yaml
+# All configured process flows.
+#
+# MANAGING FLOWS:
+#   helm flows list               → show all flows with status
+#   helm flows add                → guided wizard to add a new flow
+#   helm flows edit <id>          → open the flow's instruction file in your editor
+#   helm run <flow_id>            → run a flow manually
+#
+# HUMAN GATES:
+#   human_gate_before_agents: true means HELM will pause and display the proposed
+#   action list before any agents fire. Nothing external happens until you press [a].
+#   Set to false only for fully automated overnight flows that you've already validated.
+#
+# IDEMPOTENCY:
+#   idempotency_key points to a state file that tracks already-processed IDs.
+#   This prevents duplicate tasks/actions if a flow runs twice (e.g. after a crash).
+
+# TEMPLATE TOKENS:
+#   {user} and {date} in path values below are runtime substitution tokens —
+#   HELM replaces them with the active username and today's date (YYYY-MM-DD) at run time.
+#   In documentation and comments elsewhere, [user] and YYYY-MM-DD serve the same role.
+
+flows:
+
+  - id: overnight_triage
+    label: Overnight Email Triage
+    enabled: true
+    instruction_file: /instructions/flows/OVERNIGHT_TRIAGE.md
+    agents:
+      - task_classifier
+      - notes_agent
+    inputs_required:
+      - gmail
+      - todoist
+      - zoom
+    human_gate_before_agents: false     # Runs fully automated. Validate manually before enabling.
+    idempotency_key: "state/{user}/processed_ids.json"
+    output_report: "outputs/{user}/{date}/overnight_report.md"
+    notes: >
+      Runs on Railway at 5 AM on weekdays (configure schedule in triggers.yaml).
+      Scans inbox, creates Todoist tasks from actionable emails, processes Zoom summaries.
+      Review overnight_report.md each morning before running AM Sweep.
+
+  - id: transit_prep
+    label: Overnight Transit Prep
+    enabled: true
+    instruction_file: /instructions/flows/TRANSIT_PREP.md
+    agents:
+      - calendar_manager
+    inputs_required:
+      - google_calendar
+      - google_maps
+    human_gate_before_agents: false     # Runs fully automated. Only inserts buffer events.
+    notes: >
+      Runs on Railway at 5:10 AM on weekdays.
+      Scans tomorrow's calendar for physical-location meetings and inserts
+      drive time buffer events using real Google Maps data.
+
+  - id: am_sweep
+    label: AM Sweep
+    enabled: true
+    instruction_file: /instructions/flows/AM_SWEEP.md
+    agents:
+      - task_classifier
+      - email_drafter
+      - calendar_manager
+      - research_agent
+      - notes_agent
+    inputs_required:
+      - todoist
+      - gmail
+      - google_calendar
+      - zoom
+    human_gate_before_agents: true      # Always pauses for review. Do not set to false.
+    parallel: true                      # Approved agents fire simultaneously
+    notes: >
+      Your primary interactive flow. Run each morning with: helm run am-sweep
+      Classifies all open tasks, presents them for review, then fires approved agents in parallel.
+      Completion report displayed when all agents finish.
+
+  - id: time_block
+    label: Time Block
+    enabled: true
+    instruction_file: /instructions/flows/TIME_BLOCK.md
+    agents:
+      - time_blocker
+    inputs_required:
+      - todoist
+      - google_calendar
+      - google_maps
+    human_gate_before_agents: true      # Always pauses for schedule review. Do not set to false.
+    parallel: false
+    notes: >
+      Run after AM Sweep when you're ready to structure your day.
+      Generates a proposed time-blocked schedule respecting your locations,
+      energy levels, and scheduling rules. You approve before anything hits your calendar.

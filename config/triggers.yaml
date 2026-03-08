@@ -1,0 +1,76 @@
+# CHIEF — triggers.yaml
+# All configured triggers — scheduled (Railway cron) and manual (HELM CLI).
+#
+# MANAGING TRIGGERS:
+#   helm triggers list            → show all triggers with schedules and enabled status
+#   helm triggers toggle <id>     → enable or disable a trigger
+#   helm triggers add             → guided wizard to add a new trigger
+#   helm triggers edit <id>       → edit a trigger's configuration
+#
+# CRON SYNTAX (for scheduled triggers):
+#   "0 5 * * 1-5"  → 5:00 AM, Monday–Friday
+#   "30 6 * * *"   → 6:30 AM, every day
+#   Use https://crontab.guru to build and verify cron expressions.
+#
+# TIMEZONE NOTE:
+#   Cron schedules on Railway run in UTC by default.
+#   Convert your local time to UTC before setting schedules.
+#   Example: 5 AM ET (UTC-5) = "0 10 * * 1-5" in UTC.
+#   Set your timezone in config/system.yaml and Railway environment variables.
+#
+# ENABLING SCHEDULED TRIGGERS:
+#   1. Complete Phase 5 (manual test runs) before enabling any scheduled trigger.
+#   2. Set enabled: true here.
+#   3. Configure the corresponding cron job in the Railway dashboard.
+#   4. See /getting_started/RAILWAY_SETUP.md for full instructions.
+
+triggers:
+
+  # ── Scheduled (Railway Cron) ──────────────────────────────────────────────
+
+  - id: overnight_triage
+    label: Overnight Email Triage
+    type: scheduled
+    enabled: false            # Set to true only after successful manual test runs
+    schedule_utc: "0 10 * * 1-5"   # Default: 5 AM ET weekdays. Adjust for your timezone.
+    schedule_human: "5:00 AM weekdays"   # Update this when you change schedule_utc
+    platform: railway
+    flow: overnight_triage
+    human_gate: false
+    notes: >
+      Runs before you wake up. Processes overnight email and Zoom summaries.
+      Review the output report each morning before running AM Sweep.
+      Do not enable until you've run `helm run overnight-triage` manually at least twice.
+
+  - id: transit_prep
+    label: Overnight Transit Prep
+    type: scheduled
+    enabled: false            # Set to true only after successful manual test runs
+    schedule_utc: "10 10 * * 1-5"  # Default: 5:10 AM ET weekdays (10 min after triage)
+    schedule_human: "5:10 AM weekdays"
+    platform: railway
+    flow: transit_prep
+    human_gate: false
+    notes: >
+      Runs after overnight triage. Inserts drive time buffers for tomorrow's meetings.
+      Requires google_calendar and google_maps inputs to be configured and tested.
+
+  # ── Manual (HELM CLI) ─────────────────────────────────────────────────────
+
+  - id: am_sweep
+    label: AM Sweep
+    type: manual
+    enabled: true
+    invocation: "helm run am-sweep"
+    flow: am_sweep
+    human_gate: true          # Hard stop — always requires approval before agents fire
+    notes: "Your primary morning command. Run this when you sit down at your desk."
+
+  - id: time_block
+    label: Time Block
+    type: manual
+    enabled: true
+    invocation: "helm run time-block"
+    flow: time_block
+    human_gate: true          # Hard stop — always requires approval before calendar writes
+    notes: "Run after AM Sweep when you're ready to structure your day."

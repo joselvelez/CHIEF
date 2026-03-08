@@ -1,0 +1,139 @@
+# CHIEF — agents.yaml
+# All configured agents and their toggle states.
+#
+# MANAGING AGENTS:
+#   helm agents list              → show all agents with status
+#   helm agents add               → guided wizard to add a new agent
+#   helm agents toggle <id>       → enable or disable an agent
+#   helm agents edit <id>         → open the agent's instruction file in your editor
+#   helm tune <id>                → open instruction file + recent logs side by side
+#
+# ADDING A NEW AGENT:
+#   Run `helm agents add` — it will prompt you for the agent's purpose, inputs,
+#   outputs, and hard limits, then generate an instruction file scaffold and
+#   add the entry here automatically.
+#
+# HARD LIMITS:
+#   Hard limits are non-negotiable constraints enforced at the flow level.
+#   They cannot be overridden by instruction file changes alone — they require
+#   a deliberate config edit here AND a comment explaining why.
+
+agents:
+
+  - id: task_classifier
+    label: Task Classifier
+    enabled: true
+    instruction_file: /instructions/agents/TASK_CLASSIFIER.md
+    inputs:
+      - todoist
+      - gmail
+      - zoom
+    outputs:
+      - classified_task_list
+    context_keys:
+      - calendar_today
+      - recent_transcripts
+      - client_profiles
+      - classification_rules
+    notes: "Core agent. Used in both Overnight Triage and AM Sweep. Disable with caution."
+
+  - id: email_drafter
+    label: Email Drafter
+    enabled: true
+    instruction_file: /instructions/agents/EMAIL_DRAFTER.md
+    inputs:
+      - gmail
+    outputs:
+      - gmail_drafts
+    context_keys:
+      - tasks_today
+      - voice_profile
+      - client_profiles
+    hard_limits:
+      never_send: true                  # Agents write to Drafts only — you send manually
+      max_drafts_per_run: 20
+    notes: "Writes to Gmail Drafts folder. You review and send manually."
+
+  - id: calendar_manager
+    label: Calendar Manager
+    enabled: true
+    instruction_file: /instructions/agents/CALENDAR_MANAGER.md
+    inputs:
+      - google_calendar
+      - google_maps
+      - todoist
+    outputs:
+      - proposed_calendar_events
+      - transit_buffer_events
+    context_keys:
+      - calendar_today
+      - user_locations
+      - working_hours
+      - scheduling_rules
+    hard_limits:
+      never_accept_decline: true            # Never RSVPs on your behalf
+      never_modify_existing_events: true    # Default: never modify. Overridden by flexibility
+                                            # rules in SCHEDULING.md — events explicitly marked
+                                            # as flexible (via naming convention or flexibility
+                                            # list) may be proposed for rescheduling.
+      propose_only: true                    # All events require human approval before push
+    flow_overrides:
+      transit_prep:
+        propose_only: false                 # EXPLICIT EXCEPTION: transit_prep is pre-approved
+        # Rationale: transit_prep inserts drive time buffers only — a narrow, low-risk
+        # action approved implicitly by enabling the scheduled trigger. The trigger itself
+        # (human_gate: false in triggers.yaml) is the approval mechanism.
+        # This exception must be re-evaluated if transit_prep's scope ever expands.
+    notes: "Proposes new events and transit buffers. Requires approval before calendar writes — except transit_prep, which is pre-approved (see flow_overrides)."
+
+  - id: research_agent
+    label: Research Agent
+    enabled: true
+    instruction_file: /instructions/agents/RESEARCH_AGENT.md
+    inputs:
+      - web_search
+    outputs:
+      - research_files
+    context_keys:
+      - research_request
+      - client_profiles
+    notes: "Outputs research summaries to /outputs/[user]/[date]/. Reviewed async."
+
+  - id: notes_agent
+    label: Notes Agent
+    enabled: true
+    instruction_file: /instructions/agents/NOTES_AGENT.md
+    inputs:
+      - zoom
+      - todoist
+    outputs:
+      - knowledge_base_updates
+    context_keys:
+      - client_profiles
+      - existing_notes
+      - recent_transcripts
+    hard_limits:
+      never_overwrite_strategic_content: true   # Appends only — never destructive
+      append_only: true
+    notes: "Processes Zoom summaries → knowledge base and task objects. Appends only, never overwrites."
+
+  - id: time_blocker
+    label: Time Blocker
+    enabled: true
+    instruction_file: /instructions/agents/TIME_BLOCKER.md
+    inputs:
+      - todoist
+      - google_calendar
+      - google_maps
+    outputs:
+      - proposed_schedule
+    context_keys:
+      - tasks_today
+      - calendar_today
+      - user_locations
+      - working_hours
+      - scheduling_rules
+    hard_limits:
+      never_modify_committed_events: true   # Only works with open time slots
+      propose_only: true                    # Schedule requires human approval before push
+    notes: "Generates a proposed time-blocked day. You review and approve before anything hits your calendar."

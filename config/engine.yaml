@@ -1,0 +1,61 @@
+# CHIEF — engine.yaml
+# Orchestration engine configuration.
+#
+# The engine is what reads instruction files and runs agents.
+# Claude Code CLI is the default and recommended engine.
+#
+# SWITCHING ENGINES:
+#   helm engine set <id>          → switch the active engine
+#   helm engine status            → show current engine and settings
+#
+# NOTE: The instruction markdown files in /instructions/ are designed to be
+# human-readable and largely engine-agnostic. If you switch engines, review
+# each instruction file for any formatting adjustments required by the new engine.
+
+engine:
+  default: claude_code_cli
+
+  available:
+
+    - id: claude_code_cli
+      label: Claude Code CLI
+      enabled: true
+      command: claude
+      notes: >
+        Default and recommended. Uses the Claude Code subagent system.
+        Requires Claude Code to be installed: npm install -g @anthropic-ai/claude-code
+        Authentication is handled by Claude Code's own credential management.
+
+    - id: anthropic_api
+      label: Anthropic API (direct)
+      enabled: false
+      notes: >
+        Calls the Anthropic API directly via a custom runner.
+        Requires ANTHROPIC_API_KEY in secrets (helm secrets set ANTHROPIC_API_KEY).
+        Use this if you prefer not to install Claude Code, or for Railway scheduled runs.
+
+    - id: openai_api
+      label: OpenAI API
+      enabled: false
+      notes: >
+        Alternative LLM engine. Requires OPENAI_API_KEY.
+        Instruction files are written for Claude — review and adjust prompting
+        conventions before using a different model.
+
+  settings:
+    # Maximum number of agents that can run simultaneously in a parallel flow
+    max_parallel_agents: 6
+
+    # Seconds before an agent run is considered timed out
+    default_timeout_seconds: 120
+
+    # Whether to automatically retry a failed agent run
+    retry_on_failure: true
+    max_retries: 2
+
+    # Model to use when running via Anthropic API directly (not Claude Code CLI)
+    # Always use the latest Sonnet model for the right balance of quality and speed
+    anthropic_model: "claude-sonnet-4-6"
+
+    # Maximum tokens per agent completion (when using API directly)
+    max_tokens: 4096

@@ -78,7 +78,7 @@ The core directory structure ships with the repository. You do not need to creat
 │   ├── package.json            ← Published to npm as 'chief-helm'
 │   ├── tsconfig.json
 │   ├── README.md               ← HELM developer and user docs
-│   └── /src/                   ← TypeScript source (see HELM_PRD.md for full structure)
+│   └── /src/                   ← TypeScript source
 │
 ├── /getting_started/           ← Detailed setup guides (linked from checklist below)
 │   ├── RAILWAY_SETUP.md        ← Full Railway configuration walkthrough
@@ -111,6 +111,7 @@ The core directory structure ships with the repository. You do not need to creat
 │   │   └── TIME_BLOCKER.md
 │   └── /flows/
 │       ├── OVERNIGHT_TRIAGE.md
+│       ├── TRANSIT_PREP.md
 │       ├── AM_SWEEP.md
 │       └── TIME_BLOCK.md
 │
@@ -222,7 +223,10 @@ inputs:
     configured: true
     scope: [email_read, draft_write]
     setup_guide: /instructions/setup/gmail.md
-    credentials_ref: GMAIL_OAUTH_TOKEN   # points to secrets manager key
+    credentials_ref:
+      client_id: GMAIL_CLIENT_ID
+      client_secret: GMAIL_CLIENT_SECRET
+      refresh_token: GMAIL_OAUTH_REFRESH_TOKEN
 
   - id: google_calendar
     label: Google Calendar
@@ -230,7 +234,10 @@ inputs:
     configured: true
     scope: [calendar_read, calendar_write]
     setup_guide: /instructions/setup/google_calendar.md
-    credentials_ref: GCAL_OAUTH_TOKEN
+    credentials_ref:
+      client_id: GCAL_CLIENT_ID
+      client_secret: GCAL_CLIENT_SECRET
+      refresh_token: GCAL_OAUTH_REFRESH_TOKEN
 
   - id: google_maps
     label: Google Maps API
@@ -253,7 +260,11 @@ inputs:
     configured: true
     scope: [meeting_summaries_read, recordings_read]
     setup_guide: /instructions/setup/zoom.md
-    credentials_ref: ZOOM_OAUTH_TOKEN
+    credentials_ref:
+      account_id: ZOOM_ACCOUNT_ID
+      client_id: ZOOM_CLIENT_ID
+      client_secret: ZOOM_CLIENT_SECRET
+      oauth_token: ZOOM_OAUTH_TOKEN
 
   - id: notion
     label: Notion
@@ -371,7 +382,7 @@ agents:
     enabled: true
     instruction_file: /instructions/agents/CALENDAR_MANAGER.md
     inputs: [google_calendar, google_maps, todoist]
-    outputs: [calendar_events, transit_buffers]
+    outputs: [proposed_calendar_events, transit_buffer_events]
     context_keys: [user_locations, working_hours]
     hard_limits:
       - never_accept_decline: true
@@ -466,18 +477,20 @@ Known edge cases and how to handle them.
 triggers:
   - id: overnight_triage
     label: Overnight Triage
-    enabled: true
+    enabled: false            # Ships disabled — enable after successful manual test runs
     type: scheduled
-    schedule: "0 5 * * 1-5"      # 5 AM weekdays (cron syntax, adjust for your timezone)
+    schedule_utc: "0 10 * * 1-5"    # 5 AM ET weekdays (adjust for your timezone)
+    schedule_human: "5:00 AM weekdays"
     platform: railway
     flow: overnight_triage
     human_gate: false             # Runs fully automated, report delivered async
 
   - id: transit_prep
     label: Overnight Transit Prep
-    enabled: true
+    enabled: false            # Ships disabled — enable after successful manual test runs
     type: scheduled
-    schedule: "10 5 * * 1-5"     # 5:10 AM weekdays
+    schedule_utc: "10 10 * * 1-5"   # 5:10 AM ET weekdays
+    schedule_human: "5:10 AM weekdays"
     platform: railway
     flow: transit_prep
     human_gate: false
@@ -675,7 +688,7 @@ HELM source code lives at `/helm/` in this repository. It is a self-contained No
 npm install -g chief-helm
 ```
 
-Requires Node.js v20+ and Git. See the [Getting Started Checklist](#18-getting-started-checklist) for full prerequisites. The full HELM product specification is in `HELM_PRD.md`.
+Requires Node.js v20+ and Git. See the [Getting Started Checklist](#18-getting-started-checklist) for full prerequisites.
 
 ### Design Principles
 
@@ -799,7 +812,7 @@ HELM encrypts all secrets with AES-256-GCM using a key derived via PBKDF2 from m
 HELM abstracts this entirely:
 
 ```bash
-helm secrets set GMAIL_OAUTH_TOKEN
+helm secrets set GMAIL_OAUTH_REFRESH_TOKEN
 # → Prompts for value (masked input)
 # → Encrypts with AES-256-GCM and stores in ~/.chief/config.json
 # → Never written to disk in plaintext, never logged, never committed
@@ -848,7 +861,7 @@ Context packages are written to `/context/[user]/YYYY-MM-DD-[agent_id].md` and p
 | `tasks_today` | Full list of today's classified tasks with metadata | email_drafter, time_blocker |
 | `calendar_today` | Today's events + next 24h | calendar_manager, task_classifier |
 | `recent_transcripts` | Last 3 Zoom meeting summaries | task_classifier, notes_agent |
-| `voice_profile` | Contents of VOICE.md | email_drafter |
+| `voice_profile` | Contents of VOICE.md | email_drafter, notes_agent |
 | `client_profiles` | Contents of CLIENTS.md | all agents |
 | `scheduling_rules` | Contents of SCHEDULING.md | calendar_manager, time_blocker |
 | `classification_rules` | Contents of CLASSIFY.md | task_classifier |
@@ -1049,6 +1062,8 @@ Work through these phases in order. Do not skip the document-writing phase — i
   → Go to [marketplace.zoom.us](https://marketplace.zoom.us) → Develop → Build App → Server-to-Server OAuth
   → Required scopes: `meeting:read:admin`, `meeting_summary:read:admin`, `recording:read:admin`
   → Enable Zoom AI Companion in your account settings (requires paid plan)
+  → After creating the app, generate an OAuth token from your Account ID + Client ID + Client Secret
+  → You will store four secrets: `ZOOM_ACCOUNT_ID`, `ZOOM_CLIENT_ID`, `ZOOM_CLIENT_SECRET`, `ZOOM_OAUTH_TOKEN`
 
 - [ ] **Anthropic** — Generate API key
   → Go to [console.anthropic.com](https://console.anthropic.com) → API Keys → Create Key
@@ -1135,6 +1150,7 @@ The templates in `/users/_template/` contain instructional comments to guide you
   helm secrets set ZOOM_ACCOUNT_ID
   helm secrets set ZOOM_CLIENT_ID
   helm secrets set ZOOM_CLIENT_SECRET
+  helm secrets set ZOOM_OAUTH_TOKEN
   ```
 
 - [ ] Test every connection:

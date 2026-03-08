@@ -1,0 +1,147 @@
+# CHIEF — inputs.yaml
+# All configured data source integrations.
+#
+# MANAGING INPUTS:
+#   helm inputs list              → show all inputs with enabled/configured status
+#   helm inputs add               → guided wizard to add a new input
+#   helm inputs toggle <id>       → enable or disable an input without removing config
+#   helm inputs test <id>         → verify a connection is working
+#
+# CREDENTIALS:
+#   credentials_ref points to the key name in the HELM secrets manager (~/.chief/config.json).
+#   Never put actual credential values here — only key names.
+#   Store values with: helm secrets set <KEY_NAME>
+#
+# SETUP GUIDES:
+#   Detailed setup instructions for each input are in /getting_started/
+
+inputs:
+
+  # ── Google ──────────────────────────────────────────────────────────────────
+
+  - id: gmail
+    label: Gmail
+    enabled: false          # Set to true after completing credential setup
+    configured: false       # Set to true after helm inputs test gmail passes
+    scope:
+      - email_read
+      - draft_write         # Agents write drafts only — never send
+    credentials_ref:
+      client_id: GMAIL_CLIENT_ID
+      client_secret: GMAIL_CLIENT_SECRET
+      refresh_token: GMAIL_OAUTH_REFRESH_TOKEN
+    setup_guide: /instructions/setup/gmail.md
+    notes: "Requires Gmail API enabled in Google Cloud Console. OAuth 2.0 credentials."
+
+  - id: google_calendar
+    label: Google Calendar
+    enabled: false
+    configured: false
+    scope:
+      - calendar_read
+      - calendar_write      # Only writes proposed events after human approval
+    credentials_ref:
+      client_id: GCAL_CLIENT_ID
+      client_secret: GCAL_CLIENT_SECRET
+      refresh_token: GCAL_OAUTH_REFRESH_TOKEN
+    setup_guide: /instructions/setup/google_calendar.md
+    notes: "Can share OAuth credentials with Gmail if using the same Google Cloud project."
+
+  - id: google_maps
+    label: Google Maps API
+    enabled: false
+    configured: false
+    scope:
+      - distance_matrix     # Used for transit time calculations between locations
+    credentials_ref:
+      api_key: GOOGLE_MAPS_API_KEY
+    setup_guide: /instructions/setup/google_maps.md
+    notes: "Enable Distance Matrix API in Google Cloud Console. API key (not OAuth)."
+
+  # ── Task Management ──────────────────────────────────────────────────────────
+
+  - id: todoist
+    label: Todoist
+    enabled: false
+    configured: false
+    scope:
+      - tasks_read
+      - tasks_write         # Creates tasks from email triage; updates defer dates
+    credentials_ref:
+      api_token: TODOIST_API_TOKEN
+    setup_guide: /instructions/setup/todoist.md
+    notes: "API token found at app.todoist.com → Settings → Integrations → Developer."
+
+  # ── Meetings ─────────────────────────────────────────────────────────────────
+
+  - id: zoom
+    label: Zoom (AI Meeting Notes)
+    enabled: false
+    configured: false
+    scope:
+      - meeting_summaries_read
+      - recordings_read
+    credentials_ref:
+      account_id: ZOOM_ACCOUNT_ID
+      client_id: ZOOM_CLIENT_ID
+      client_secret: ZOOM_CLIENT_SECRET
+      oauth_token: ZOOM_OAUTH_TOKEN
+    setup_guide: /instructions/setup/zoom.md
+    notes: >
+      Requires Zoom AI Companion enabled on your account (paid plans only).
+      Create a Server-to-Server OAuth app at marketplace.zoom.us.
+      Required scopes: meeting:read:admin, meeting_summary:read:admin, recording:read:admin.
+
+  # ── Engine-Provided ──────────────────────────────────────────────────────────
+
+  - id: web_search
+    label: Web Search
+    enabled: true
+    configured: true        # Built-in to the orchestration engine — no credentials required
+    scope:
+      - web_search_read
+    credentials_ref: {}     # No credentials needed — provided by the engine
+    notes: >
+      Built-in capability provided by the Claude Code CLI and Anthropic API engines.
+      No setup required. Used exclusively by the Research Agent.
+      If switching to a non-Anthropic engine, verify web search availability.
+
+  # ── Optional / Future Integrations ───────────────────────────────────────────
+  # These are pre-registered but disabled. Enable with: helm inputs toggle <id>
+  # Run helm inputs add to connect a new integration not listed here.
+
+  - id: notion
+    label: Notion
+    enabled: false
+    configured: false
+    scope:
+      - pages_read
+      - pages_write
+    credentials_ref:
+      api_key: NOTION_API_KEY
+    setup_guide: /instructions/setup/notion.md
+    notes: "Optional. Useful if you use Notion as a knowledge base alongside /knowledge/."
+
+  - id: slack
+    label: Slack
+    enabled: false
+    configured: false
+    scope:
+      - messages_read
+      - files_read
+    credentials_ref:
+      bot_token: SLACK_BOT_TOKEN
+    setup_guide: /instructions/setup/slack.md
+    notes: "Optional. Enables the system to pull Slack messages into triage."
+
+  - id: linear
+    label: Linear
+    enabled: false
+    configured: false
+    scope:
+      - issues_read
+      - issues_write
+    credentials_ref:
+      api_key: LINEAR_API_KEY
+    setup_guide: /instructions/setup/linear.md
+    notes: "Optional. Alternative to Todoist for engineering-focused workflows."

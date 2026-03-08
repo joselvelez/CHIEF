@@ -1,0 +1,88 @@
+# CHIEF — system.yaml
+# Global system settings. These apply to all users and all flows.
+# After changing this file, run `helm status` to verify the system reflects your changes.
+
+system:
+  version: "0.1.0"
+
+  # The active user. Set automatically by `helm setup`. Change here to switch users.
+  # Must match a folder name under /users/[username]/
+  active_user: ""
+
+  # System-wide language for agent outputs and HELM UI
+  language: "en"
+
+  # Timezone used for scheduling, log timestamps, and cron interpretation
+  # Use IANA format: e.g. America/New_York, Europe/London, America/Sao_Paulo
+  timezone: "America/New_York"
+
+  # Where agent outputs are staged before review
+  outputs_dir: "outputs"
+
+  # Where daily context packages are written
+  context_dir: "context"
+
+  # Where run logs are written
+  logs_dir: "logs"
+
+  # Where idempotency and run state files live
+  state_dir: "state"
+
+  # Where the user knowledge base lives
+  knowledge_dir: "knowledge"
+
+git:
+  # Commit message prefix for automated runs
+  auto_commit_prefix: "[auto]"
+
+  # Commit message prefix for manual/tuning changes
+  manual_commit_prefix: "[manual]"
+
+  # Commit message prefix for system tuning changes
+  tuning_commit_prefix: "[system] tuning:"
+
+  # Whether to automatically git pull at the start of every flow run
+  pull_on_run: true
+
+  # Whether to automatically git commit + push at the end of every flow run
+  push_on_run: true
+
+context:
+  # Maximum token budget per agent context package
+  # If a context key would exceed this, it is summarized automatically
+  max_tokens_per_package: 20000
+
+  # Number of recent Zoom meeting summaries to include in context
+  recent_transcripts_window_days: 3
+
+logging:
+  # Log level: debug | info | warn | error
+  level: "info"
+
+  # Whether to include agent output previews in run logs
+  include_output_previews: true
+
+  # Number of days to retain log files before archiving
+  retention_days: 90
+
+# ── Railway Environment Variables ────────────────────────────────────────────
+# The following credentials are set in the Railway dashboard (not stored locally).
+# They are listed here for reference only — never put values in this file.
+#
+# CHIEF_USERNAME              → must match active_user above
+# ANTHROPIC_API_KEY           → required if using anthropic_api engine on Railway
+# CHIEF_REPO_DEPLOY_KEY       → SSH deploy key for Railway to pull your private repo
+# GMAIL_CLIENT_ID             → same as local secrets
+# GMAIL_CLIENT_SECRET
+# GMAIL_OAUTH_REFRESH_TOKEN
+# GCAL_CLIENT_ID
+# GCAL_CLIENT_SECRET
+# GCAL_OAUTH_REFRESH_TOKEN
+# GOOGLE_MAPS_API_KEY
+# TODOIST_API_TOKEN
+# ZOOM_ACCOUNT_ID
+# ZOOM_CLIENT_ID
+# ZOOM_CLIENT_SECRET
+# ZOOM_OAUTH_TOKEN
+#
+# See /getting_started/RAILWAY_SETUP.md for full Railway configuration walkthrough.

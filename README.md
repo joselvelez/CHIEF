@@ -117,7 +117,7 @@ This repository ships with the core directory structure already in place. Fork i
 │   ├── RAILWAY_SETUP.md
 │   └── GOOGLE_APIS_SETUP.md
 │
-├── /config/                    ← System configuration (inputs, agents, flows, triggers)
+├── /config/                    ← System configuration (system, inputs, agents, flows, triggers, engine)
 │
 ├── /users/                     ← Per-user profiles and key documents
 │   └── /_template/             ← Copy this to /users/[yourname]/ and fill it in
