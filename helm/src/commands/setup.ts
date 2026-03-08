@@ -94,11 +94,16 @@ function warn(msg: string): void {
 async function step1LocateRepo(): Promise<string> {
   printStep(1, "Locate instance repo");
 
+  // Check if current working directory is already a valid CHIEF repo
+  const cwd = process.cwd();
+  const cwdIsValid = isValidRepoStructure(cwd);
+
   const { rawPath } = await inquirer.prompt<{ rawPath: string }>([
     {
       type: "input",
       name: "rawPath",
-      message: "  Path to your personal CHIEF instance repo:",
+      message: "  Local path to your personal CHIEF instance repo (e.g. ~/Projects/CHIEF):",
+      default: cwdIsValid ? cwd : undefined,
       validate: (input: string) => {
         if (!input.trim()) return "Path cannot be empty.";
         const expanded = expandHomePath(input.trim());
