@@ -243,14 +243,14 @@ async function step2CreateUserIdentity(repoRoot: string): Promise<string> {
 /**
  * For each input in inputs.yaml, asks whether to enable it. For enabled
  * inputs, collects all required credentials via masked prompts, stores
- * them in the OS keychain, and runs a connectivity test.
+ * them in the encrypted local storage, and runs a connectivity test.
  *
  * Updates the `enabled` and `configured` fields in inputs.yaml after
  * each input is processed. This ensures partial progress is persisted
  * even if the wizard is interrupted.
  *
  * @param repoRoot - Absolute path to the instance repo.
- * @param username - Active username for keychain scoping.
+ * @param username - Active username for secret scoping.
  */
 async function step3ConnectInputs(
   repoRoot: string,

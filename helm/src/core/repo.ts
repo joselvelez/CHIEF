@@ -61,6 +61,7 @@ const LOCAL_CONFIG_DEFAULTS: LocalConfig = {
   setup_complete: false,
   last_sync: "",
   secrets_manifest: [],
+  encrypted_secrets: {},
 };
 
 /**

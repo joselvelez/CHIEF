@@ -12,7 +12,7 @@
  * and instructs the user to refresh it via helm secrets set. No silent
  * token refresh is attempted in Phase 1 — that is Phase 2 scope.
  *
- * Secret values retrieved from the keychain are used directly in HTTP
+ * Secret values retrieved from encrypted local storage are used directly in HTTP
  * Authorization headers and are never included in any log output or
  * error message.
  */
@@ -23,7 +23,7 @@ import { getSecret } from "./secrets.js";
 // ─── Credential Key Definitions ───────────────────────────────────────────────
 
 /**
- * Ordered list of OS keychain key names required by each input.
+ * Ordered list of secret key names required by each input.
  * Used during helm setup to prompt for each credential and during
  * helm inputs test to retrieve them for connectivity checks.
  *

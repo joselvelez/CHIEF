@@ -792,20 +792,16 @@ After approval: agents fire in parallel, terminal shows live progress per agent,
 
 Secrets (API keys, OAuth tokens) are **never stored in the git repository**. They live locally on the machine running the system.
 
-### Strategy: OS Keychain + .env Fallback
+### Strategy: Encrypted Local Storage
 
-**Primary (recommended):** Use the operating system's native secrets store.
-- **macOS:** Keychain Access — accessed programmatically via `keytar` npm package
-- **Windows:** Windows Credential Manager — also accessible via `keytar`
-
-**Fallback:** A local `.env` file in the user's home directory (`~/.chief/.env`), outside the repo, in `.gitignore`. Simpler but less secure.
+HELM encrypts all secrets with AES-256-GCM using a key derived via PBKDF2 from machine-specific entropy (hostname + OS username). Encrypted values are stored in `~/.chief/config.json` alongside the rest of the local config. Values are never written to disk in plaintext.
 
 HELM abstracts this entirely:
 
 ```bash
 helm secrets set GMAIL_OAUTH_TOKEN
 # → Prompts for value (masked input)
-# → Stores in OS keychain under key "chief/[username]/GMAIL_OAUTH_TOKEN"
+# → Encrypts with AES-256-GCM and stores in ~/.chief/config.json
 # → Never written to disk in plaintext, never logged, never committed
 ```
 
@@ -817,16 +813,16 @@ OAuth tokens have expiry and need refresh handling. HELM manages this:
 helm inputs test gmail
 # → Checks if token is valid
 # → If expired, launches browser-based re-auth flow automatically
-# → Stores new token to keychain
+# → Stores new encrypted token
 ```
 
 ### What Lives Where
 
 | Secret Type | Storage Location |
 |---|---|
-| API keys (Maps, etc.) | OS Keychain |
-| OAuth access tokens | OS Keychain |
-| OAuth refresh tokens | OS Keychain |
+| API keys (Maps, etc.) | Encrypted in ~/.chief/config.json |
+| OAuth access tokens | Encrypted in ~/.chief/config.json |
+| OAuth refresh tokens | Encrypted in ~/.chief/config.json |
 | Railway env vars | Railway dashboard (not local) |
 | Config key references | `config/inputs.yaml` (key names only, never values) |
 
@@ -1126,7 +1122,7 @@ The templates in `/users/_template/` contain instructional comments to guide you
   #   walks through each credential
   ```
 
-- [ ] Store all credentials in the OS keychain:
+- [ ] Store all credentials:
   ```bash
   helm secrets set GMAIL_CLIENT_ID
   helm secrets set GMAIL_CLIENT_SECRET

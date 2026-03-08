@@ -72,7 +72,7 @@ Everything that passes through CHIEF gets classified into one of four states:
 | Meeting notes | Zoom AI Companion API |
 | Maps / routing | Google Maps Distance Matrix API |
 | Knowledge base | Markdown files in Git |
-| Secrets | OS Keychain (macOS / Windows) via keytar |
+| Secrets | Encrypted local storage (AES-256-GCM via node:crypto) |
 
 ---
 

@@ -166,11 +166,16 @@ export interface LocalConfig {
   /** ISO 8601 timestamp of the last successful helm sync. */
   last_sync: string;
   /**
-   * List of secret key names stored in the OS keychain for this machine.
+   * List of secret key names stored on this machine.
    * Format: "[username]/[KEY_NAME]". Values are never stored here — only names.
-   * This manifest exists because the OS keychain API does not support enumeration.
    */
   secrets_manifest: string[];
+  /**
+   * AES-256-GCM encrypted secret values keyed by "[username]/[KEY_NAME]".
+   * Each value is a colon-delimited string: "iv:authTag:ciphertext" (all hex-encoded).
+   * Decrypted at runtime using a PBKDF2-derived key from machine-specific entropy.
+   */
+  encrypted_secrets: Record<string, string>;
 }
 
 // ─── State Files ──────────────────────────────────────────────────────────────

@@ -1,10 +1,10 @@
 /**
- * @file helm secrets — OS keychain credential management.
+ * @file helm secrets — encrypted credential management.
  *
  * Subcommands:
- *   helm secrets set <key>      Masked input → stored in OS keychain
+ *   helm secrets set <key>      Masked input → encrypted and stored locally
  *   helm secrets list           Key names only, never values
- *   helm secrets verify <key>   Confirm key exists in keychain
+ *   helm secrets verify <key>   Confirm key exists in encrypted storage
  *   helm secrets delete <key>   Remove with confirmation prompt
  *
  * Secret values are never printed, logged, or included in error messages.
@@ -35,13 +35,13 @@ import { theme, symbol } from "../ui/theme.js";
 export function registerSecretsCommand(program: Command): void {
   const secrets = program
     .command("secrets")
-    .description("Manage OS keychain credentials");
+    .description("Manage encrypted local storage credentials");
 
   // ── set ────────────────────────────────────────────────────────────────────
 
   secrets
     .command("set <key>")
-    .description("Store a secret in the OS keychain (masked input)")
+    .description("Store a secret in the encrypted local storage (masked input)")
     .action(async (key: string) => {
       requireSetup();
 
@@ -61,7 +61,7 @@ export function registerSecretsCommand(program: Command): void {
       await setSecret(username, key, value);
 
       console.log(
-        `  ${chalk.hex(theme.success)(symbol.success)}  Secret "${key}" stored in OS keychain.`
+        `  ${chalk.hex(theme.success)(symbol.success)}  Secret "${key}" stored in encrypted local storage.`
       );
     });
 
@@ -98,7 +98,7 @@ export function registerSecretsCommand(program: Command): void {
 
   secrets
     .command("verify <key>")
-    .description("Confirm a secret key exists in the OS keychain")
+    .description("Confirm a secret key exists in the encrypted local storage")
     .action(async (key: string) => {
       requireSetup();
 
@@ -107,11 +107,11 @@ export function registerSecretsCommand(program: Command): void {
 
       if (exists) {
         console.log(
-          `  ${chalk.hex(theme.success)(symbol.success)}  "${key}" exists in the OS keychain.`
+          `  ${chalk.hex(theme.success)(symbol.success)}  "${key}" exists in the encrypted local storage.`
         );
       } else {
         throw new HelmError(
-          `Secret "${key}" was not found in the OS keychain.`,
+          `Secret "${key}" was not found in the encrypted local storage.`,
           `Run: helm secrets set ${key}`
         );
       }
@@ -121,7 +121,7 @@ export function registerSecretsCommand(program: Command): void {
 
   secrets
     .command("delete <key>")
-    .description("Remove a secret from the OS keychain")
+    .description("Remove a secret from the encrypted local storage")
     .action(async (key: string) => {
       requireSetup();
 
@@ -131,7 +131,7 @@ export function registerSecretsCommand(program: Command): void {
         {
           type: "confirm",
           name: "confirmed",
-          message: `  Delete secret "${key}" from the OS keychain?`,
+          message: `  Delete secret "${key}" from the encrypted local storage?`,
           default: false,
         },
       ]);
@@ -145,11 +145,11 @@ export function registerSecretsCommand(program: Command): void {
 
       if (deleted) {
         console.log(
-          `  ${chalk.hex(theme.success)(symbol.success)}  Secret "${key}" deleted from OS keychain.`
+          `  ${chalk.hex(theme.success)(symbol.success)}  Secret "${key}" deleted from encrypted local storage.`
         );
       } else {
         throw new HelmError(
-          `Secret "${key}" was not found in the OS keychain.`,
+          `Secret "${key}" was not found in the encrypted local storage.`,
           `Run: helm secrets list to see what keys are stored.`
         );
       }

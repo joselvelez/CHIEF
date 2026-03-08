@@ -14,7 +14,7 @@ HELM is how a human operates the CHIEF personal AI operations system. Every flow
 | npm | v9.0.0 | `npm --version` |
 | Git | v2.30.0 | `git --version` |
 
-**Platform:** macOS 12+ or Windows 10+. OS keychain support (macOS Keychain / Windows Credential Manager) is required for credential storage.
+**Platform:** macOS 12+ or Windows 10+.
 
 **Node.js installation:** [nodejs.org](https://nodejs.org) → download the LTS version. This installs both `node` and `npm`.
 
@@ -70,10 +70,10 @@ helm config <n>               # Open config file n in your editor (auto-commits 
 
 ### Secrets
 
-Credentials are stored in the OS keychain. Values are never printed, logged, or included in error messages.
+Credentials are encrypted with AES-256-GCM and stored locally. Values are never printed, logged, or included in error messages.
 
 ```bash
-helm secrets set <KEY>        # Masked input → OS keychain
+helm secrets set <KEY>        # Masked input → encrypted local storage
 helm secrets list             # Key names only — values never shown
 helm secrets verify <KEY>     # Confirm a key exists
 helm secrets delete <KEY>     # Remove with confirmation prompt
@@ -172,7 +172,7 @@ The main CHIEF repo is never written to by HELM at runtime.
     ├── core/
     │   ├── repo.ts            conf store, local config, repo validation, setup guard
     │   ├── config.ts          YAML read/write for all instance repo config files
-    │   ├── secrets.ts         keytar wrapper, manifest management
+    │   ├── secrets.ts         AES-256-GCM encrypted storage, manifest management
     │   ├── git.ts             pull, commit, push, status via simple-git
     │   ├── state.ts           last_run.json and other state file I/O
     │   └── inputs.ts          Credential key map and per-input connectivity tests
