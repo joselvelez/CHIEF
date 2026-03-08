@@ -1,7 +1,12 @@
 {
   "name": "chief-helm",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "CLI for CHIEF — Personal AI Operations System",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joselvelez/CHIEF.git",
+    "directory": "helm"
+  },
   "type": "module",
   "bin": {
     "helm": "./dist/index.js"
