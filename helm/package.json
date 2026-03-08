@@ -1,6 +1,6 @@
 {
   "name": "chief-helm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI for CHIEF — Personal AI Operations System",
   "type": "module",
   "bin": {
@@ -24,7 +24,7 @@
     "format": "prettier --write src/**/*.{ts,tsx}"
   },
   "dependencies": {
-    "@inkjs/ui": "^2.1.0",
+    "@inkjs/ui": "^2.0.0",
     "boxen": "^8.0.1",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
@@ -33,7 +33,7 @@
     "execa": "^9.3.0",
     "gray-matter": "^4.0.3",
     "ink": "^5.1.4",
-    "inquirer": "^10.3.1",
+    "inquirer": "^13.3.0",
     "js-yaml": "^4.1.0",
     "keytar": "^7.9.0",
     "open": "^10.1.0",
