@@ -74,6 +74,9 @@ flows:
       - zoom
     human_gate_before_agents: true      # Always pauses for review. Do not set to false.
     parallel: true                      # Approved agents fire simultaneously
+    idempotency_key: "state/{user}/processed_ids.json"
+    idempotency_scope: zoom_transcripts_only  # Todoist tasks re-classified fresh each run by design
+    gate_overrides_key: "state/{user}/gate_overrides.json"  # Persists [e]/[r] gate actions across runs
     notes: >
       Your primary interactive flow. Run each morning with: helm run am-sweep
       Classifies all open tasks, presents them for review, then fires approved agents in parallel.

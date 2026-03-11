@@ -135,7 +135,8 @@ The core directory structure ships with the repository. You do not need to creat
 │   └── /[username]/
 │       ├── last_run.json       ← Timestamps of last successful runs per flow
 │       ├── deferred.json       ← Tasks deferred with reasons + target dates
-│       └── processed_ids.json  ← IDs of already-processed emails/tasks (idempotency)
+│       ├── processed_ids.json  ← IDs of already-processed emails/tasks (idempotency)
+│       └── gate_overrides.json ← Manual reclassifications from AM Sweep gate ([e]/[r] actions)
 │
 ├── /logs/
 │   └── /[username]/
@@ -373,9 +374,17 @@ agents:
     label: Task Classifier
     enabled: true
     instruction_file: /instructions/agents/TASK_CLASSIFIER.md
-    inputs: [todoist, gmail, zoom]
-    outputs: [classified_task_list]
-    context_keys: [calendar_today, recent_transcripts, client_profiles]
+    inputs: [todoist, gmail, zoom, google_calendar]
+    outputs: [classified_task_list, processed_ids]
+    context_keys: [calendar_today, recent_transcripts, client_profiles, classification_rules, user_profile, scheduling_rules]
+    hard_limits:
+      never_send_email: true
+      never_delete: true
+      never_dispatch_financial: true
+      no_downgrade_higher_rule: true
+      idempotency_required: true
+      no_calendar_rules_overnight: true
+      default_posture: "uncertain → escalate toward Yours, never toward automation"
 
   - id: calendar_manager
     label: Calendar Manager
@@ -556,6 +565,9 @@ flows:
     inputs_required: [todoist, gmail, google_calendar, zoom]
     human_gate_before_agents: true
     parallel: true
+    idempotency_key: state/[user]/processed_ids.json
+    idempotency_scope: zoom_transcripts_only
+    gate_overrides_key: state/[user]/gate_overrides.json
 
   - id: time_block
     label: Time Block
@@ -863,8 +875,9 @@ Context packages are written to `/context/[user]/YYYY-MM-DD-[agent_id].md` and p
 | `recent_transcripts` | Last 3 Zoom meeting summaries | task_classifier, notes_agent |
 | `voice_profile` | Contents of VOICE.md | email_drafter, notes_agent |
 | `client_profiles` | Contents of CLIENTS.md | all agents |
-| `scheduling_rules` | Contents of SCHEDULING.md | calendar_manager, time_blocker |
+| `scheduling_rules` | Contents of SCHEDULING.md | calendar_manager, time_blocker, task_classifier |
 | `classification_rules` | Contents of CLASSIFY.md | task_classifier |
+| `user_profile` | Contents of USER.md | task_classifier |
 | `user_locations` | Location list from USER.md | calendar_manager, time_blocker |
 | `working_hours` | Working hours from USER.md | time_blocker, calendar_manager |
 | `research_request` | Specific task being researched | research_agent |
@@ -912,6 +925,45 @@ helm tune task_classifier
 ```
 
 This opens the TASK_CLASSIFIER.md instruction file alongside the recent run log so you can add a specific rule. The change is committed to git.
+
+### Gate Override Persistence
+
+When you reclassify a task at the gate using `[e]` or `[r]`, that override is written to `state/[user]/gate_overrides.json` immediately after the gate closes (before agents fire). On future AM Sweep runs, the Task Classifier reads this file before the rule chain — any item whose `source_id` matches an active override is classified as Yours, bypassing the rule chain entirely.
+
+**Override matching** is on `source_id` (Gmail thread ID, Todoist task ID, or Zoom meeting ID + action index) — never on title strings, which may change.
+
+**Overrides are sticky until explicitly cleared:**
+
+```bash
+helm tune task_classifier --clear-override [source_id]
+```
+
+This is the right tool for one-off overrides on specific items. Use `helm tune task_classifier` (without a flag) for systematic rule changes that should apply to all similar items.
+
+**`gate_overrides.json` schema:**
+
+```json
+{
+  "schema_version": "1.0",
+  "user": "[username]",
+  "overrides": [
+    {
+      "source_id": "string",
+      "source_type": "gmail_thread | todoist_task | zoom_meeting_action",
+      "title_hint": "string — human-readable label only, not used for matching",
+      "forced_classification": "Yours",
+      "original_classification": "Dispatch | Prep | Yours | Skip",
+      "override_action": "reclassify | reject",
+      "override_date": "YYYY-MM-DD",
+      "cleared": false,
+      "cleared_date": null,
+      "cleared_by": null
+    }
+  ]
+}
+```
+
+Entries are never deleted — history is retained for audit. The file is committed to git with every AM Sweep run.
 
 ---
 

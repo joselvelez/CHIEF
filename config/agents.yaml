@@ -28,13 +28,25 @@ agents:
       - todoist
       - gmail
       - zoom
+      - google_calendar      # AM Sweep only — calendar_today not populated overnight
     outputs:
       - classified_task_list
+      - processed_ids         # Returned to flow → state/{user}/processed_ids.json
     context_keys:
-      - calendar_today
+      - calendar_today        # AM Sweep only — not populated in overnight runs
       - recent_transcripts
       - client_profiles
-      - classification_rules
+      - classification_rules  # Full CLASSIFY.md — primary classification rule source
+      - user_profile          # Full USER.md — hard rules and classification defaults
+      - scheduling_rules      # Full SCHEDULING.md — protected block definitions
+    hard_limits:
+      never_send_email: true                # Classification only — never drafts or sends
+      never_delete: true                    # Skip and defer only — never destroys
+      never_dispatch_financial: true        # Financial commitments are always Yours
+      no_downgrade_higher_rule: true        # Higher-priority rule classifications are sticky
+      idempotency_required: true            # Never reprocess an ID in processed_ids.json
+      no_calendar_rules_overnight: true     # Skip §9 calendar rules when calendar_today absent
+      default_posture: "uncertain → escalate toward Yours, never toward automation"
     notes: "Core agent. Used in both Overnight Triage and AM Sweep. Disable with caution."
 
   - id: email_drafter
