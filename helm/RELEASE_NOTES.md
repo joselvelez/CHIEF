@@ -6,7 +6,7 @@
 - Complete CLI for CHIEF personal AI operations system
 - 7 core commands: setup, status, secrets, sync, push, inputs, config
 - Interactive setup wizard with 6-step guided configuration
-- Secure credential storage using OS keychain
+- Secure credential storage using AES-256-GCM encrypted local storage
 - Git integration for configuration management
 - React-based UI components for enhanced terminal experience
 
@@ -24,7 +24,7 @@
 - React-based UI using Ink framework
 - Node.js v20+ requirement
 - Git v2.30+ requirement
-- OS keychain support for credential storage
+- AES-256-GCM encrypted local storage support for credential storage
 
 ### Installation
 ```bash
